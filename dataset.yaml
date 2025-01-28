@@ -1,0 +1,12 @@
+# Path to your training and validation data
+train: /mnt/shared-storage/yolov11L_Image_training_set_400/BT3_img_400+1.8+1.8t_4284infer_IT3/training/images/train
+val:  /mnt/shared-storage/yolov11L_Image_training_set_400/BT3_img_400+1.8+1.8t_4284infer_IT3/training/images/val
+
+# Number of classes (nc) in your dataset
+nc: 4
+
+# List of class names (not dictionary)
+names: ['Dg Diag', 'Hw Diag', 'Annotations', 'Table']
+
+# Optional: if you want to specify the path to the entire dataset (including images and annotations)
+path: /mnt/shared-storage/yolov11L_Image_training_set_400
