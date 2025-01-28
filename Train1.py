@@ -7,16 +7,7 @@ import csv
 image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/final_images'
 label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/final_txt'
 
-# Destination directories for the split data
-train_image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/images/train'
-val_image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/images/val'
-train_label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/labels/train'
-val_label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/labels/val'
-
-# Create the destination directories if they don't exist
-os.makedirs(train_image_dir, exist_ok=True)
-os.makedirs(val_image_dir, exist_ok=True)
-os.makedirs(train_label_dir, exist_ok=True)
+# Des
 os.makedirs(val_label_dir, exist_ok=True)
 
 # Set the split ratio (e.g., 20% of the data for validation)
