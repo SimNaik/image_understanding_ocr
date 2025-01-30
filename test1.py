@@ -67,7 +67,7 @@ with open(csv_file, 'a', newline='') as f:
         # Use torch.no_grad() to disable gradient calculation during inference
         with torch.no_grad():
             # Run inference on the batch of images
-            results = model(batch_paths, device=device)
+            #results = model(batch_paths, device=device)
             results = model(batch_paths, device=device, iou=0.1, conf=0.3, imgsz=960)
             
 
