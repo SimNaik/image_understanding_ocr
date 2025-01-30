@@ -87,7 +87,7 @@ with open(csv_file, 'a', newline='') as f:
                     for box in result.boxes:
                         # Extract detection details
                         class_id = int(box.cls[0])
-                        label = model.names[class_id]  # Get class label
+                        class_label = model.names[class_id]  # Get class label
                         confidence = box.conf[0].item()
                         x_center = box.xywhn[0][0].item()
                         y_center = box.xywhn[0][1].item()
@@ -95,7 +95,7 @@ with open(csv_file, 'a', newline='') as f:
                         height = box.xywhn[0][3].item()
 
                         # Write a new row for each detection
-                        writer.writerow([image_file, class_id, confidence, x_center, y_center, width, height])
+                        writer.writerow([image_file, class_label, class_id, confidence, x_center, y_center, width, height])
 
 print(f"Images have been processed and saved to {unsorted_images_dir}")
 print(f"Annotations have been saved in {unsorted_annotations_dir}")
