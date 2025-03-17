@@ -6,15 +6,19 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
-# Define paths
-IMAGE_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/final_images"
-TXT_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/final_txt"
-TRAIN_IMG_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/images/train"
-TRAIN_TXT_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/labels/train"
-VAL_IMG_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/images/val"
-VAL_TXT_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/labels/val"
-TRAIN_CSV = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/train.txt"
-VAL_CSV = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/Training/val.txt"
+# Define the base directory
+BASE_DIR_1 = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training"
+BASE_DIR_2 = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5"
+
+# Define subdirectories dynamically
+IMAGE_DIR = os.path.join(BASE_DIR_1, "final_images")
+TXT_DIR = os.path.join(BASE_DIR_1, "final_txt")
+TRAIN_IMG_DIR = os.path.join(BASE_DIR_2, "images/train")
+TRAIN_TXT_DIR = os.path.join(BASE_DIR_2, "labels/train")
+VAL_IMG_DIR = os.path.join(BASE_DIR_2, "images/val")
+VAL_TXT_DIR = os.path.join(BASE_DIR_2, "labels/val")
+TRAIN_CSV = os.path.join(BASE_DIR_2, "train.txt")
+VAL_CSV = os.path.join(BASE_DIR_2, "val.txt")
 
 # Create train/val directories if they don't exist
 for directory in [TRAIN_IMG_DIR, TRAIN_TXT_DIR, VAL_IMG_DIR, VAL_TXT_DIR]:
@@ -42,7 +46,7 @@ for txt_file in txt_files:
     labels = [int(line.split()[0]) for line in lines]
 
     # Check if all labels are within the range 0-4
-    if all(0 <= label <= 4 for label in labels):  #CHANGE HERE IF THE LABELS ARE CHANGED 
+    if all(0 <= label <= 4 for label in labels):  # CHANGE HERE IF LABELS CHANGE
         valid_txt_files.append(txt_file)
         label_distribution.extend(labels)
     else:
