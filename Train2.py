@@ -93,7 +93,7 @@ results = model.val(save=True, device=device, name="validation_results" )
 
 # Print evaluation results
 print("Evaluation Results:")
-print(evaluation_results)
+print(results)
 print("Validation complete. Predictions saved to 'runs/val/exp/labels/'.")
 
 # Launch TensorBoard
