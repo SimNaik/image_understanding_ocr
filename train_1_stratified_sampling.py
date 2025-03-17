@@ -1,6 +1,7 @@
 import os
 import shutil
 import random
+import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from collections import Counter
@@ -12,6 +13,8 @@ TRAIN_IMG_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K
 TRAIN_TXT_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/train/labels"
 VAL_IMG_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/val/images"
 VAL_TXT_DIR = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/val/labels"
+TRAIN_CSV = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/train.txt"
+VAL_CSV = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/val.txt"
 
 # Create train/val directories if they don't exist
 for directory in [TRAIN_IMG_DIR, TRAIN_TXT_DIR, VAL_IMG_DIR, VAL_TXT_DIR]:
@@ -39,7 +42,7 @@ for txt_file in txt_files:
     labels = [int(line.split()[0]) for line in lines]
 
     # Check if all labels are within the range 0-4
-    if all(0 <= label <= 4 for label in labels):
+    if all(0 <= label <= 4 for label in labels):  #CHANGE HERE IF THE LABELS ARE CHANGED 
         valid_txt_files.append(txt_file)
         label_distribution.extend(labels)
     else:
@@ -100,6 +103,20 @@ if duplicates:
         print(dup)
     exit(1)
 
+# Step 5: Create train.txt and val.txt with filenames of labels (with extensions)
+train_txt_files = [f for f in os.listdir(TRAIN_TXT_DIR) if f.endswith(".txt")]
+val_txt_files = [f for f in os.listdir(VAL_TXT_DIR) if f.endswith(".txt")]
+
+# Save as CSV (each file name on a new line)
+with open(TRAIN_CSV, "w") as f:
+    for file in train_txt_files:
+        f.write(file + "\n")
+
+with open(VAL_CSV, "w") as f:
+    for file in val_txt_files:
+        f.write(file + "\n")
+
 print("✅ Dataset successfully split using stratified sampling!")
 print(f"Train Set: {len(X_train)} images")
 print(f"Validation Set: {len(X_val)} images")
+print("✅ train.txt and val.txt created with label filenames (including extensions).")
