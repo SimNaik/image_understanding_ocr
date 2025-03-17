@@ -8,7 +8,7 @@ from collections import Counter
 
 # Define the base directory
 BASE_DIR_1 = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training"
-BASE_DIR_2 = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5"
+BASE_DIR_2 = "/mnt/shared-storage/yolov11L_Image_training_set_400"
 
 # Define subdirectories dynamically
 IMAGE_DIR = os.path.join(BASE_DIR_1, "final_images")
