@@ -4,8 +4,16 @@ import shutil
 import csv
 
 # Source directories for images and annotations
-image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/final_images'
-if they don't exist
+image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/final_images'
+label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/final_txt'
+
+# Destination directories for the split data
+train_image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/images/train'
+val_image_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/images/val'
+train_label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/labels/train'
+val_label_dir = '/mnt/shared-storage/yolov11L_Image_training_set_400/labels/val'
+
+# Create the destination directories if they don't exist
 os.makedirs(train_image_dir, exist_ok=True)
 os.makedirs(val_image_dir, exist_ok=True)
 os.makedirs(train_label_dir, exist_ok=True)
