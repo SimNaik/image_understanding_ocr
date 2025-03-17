@@ -4,23 +4,6 @@ from tensorboard import program
 import yaml
 import os
 
-# Define the directories
-#dir_1 = '/mnt/shared-storage/yolov11L_Image_training_set_400/B1_img_400_1.8k_IT1/Testing/test_predictions/diagrams_1,878k_inference'
-#dir_2 = '/mnt/shared-storage/yolov11L_Image_training_set_400/training_set_400/Images'
-
-# Get a list of files in each directory
-#files_dir_1 = set(os.listdir(dir_1))
-#files_dir_2 = set(os.listdir(dir_2))
-
-# Find common files between the two directories (duplicates)
-#duplicates = files_dir_1.intersection(files_dir_2)
-
-#if duplicates:
-   # print(f"Duplicate files found: {duplicates}")
-#else:
-    #print("No duplicates found between the two directories.")
-
-
 # Check if CUDA (NVIDIA GPU) is available and set the device accordingly
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 if torch.cuda.is_available():
