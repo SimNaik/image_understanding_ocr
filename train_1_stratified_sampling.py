@@ -19,135 +19,139 @@ VAL_IMG_DIR = os.path.join(BASE_DIR_2, "images/val")
 VAL_TXT_DIR = os.path.join(BASE_DIR_2, "labels/val")
 TRAIN_CSV = os.path.join(BASE_DIR_2, "train.txt")
 VAL_CSV = os.path.join(BASE_DIR_2, "val.txt")
+DOC_FILE = os.path.join(BASE_DIR_2, "images", "documentation.txt")  # Documentation file path
 
 # Create train/val directories if they don't exist
 for directory in [TRAIN_IMG_DIR, TRAIN_TXT_DIR, VAL_IMG_DIR, VAL_TXT_DIR]:
     os.makedirs(directory, exist_ok=True)
 
-# Collect all txt annotation files and images
-txt_files = [f for f in os.listdir(TXT_DIR) if f.endswith(".txt")]
-image_files = [f for f in os.listdir(IMAGE_DIR) if f.endswith((".jpg", ".png"))]
+# Open documentation.txt for writing logs
+with open(DOC_FILE, "w") as doc_file:
 
-# Print initial summary
-print("\n📊 Initial Dataset Summary:")
-print(f"📂 Total annotation files (TXT): {len(txt_files)}")
-print(f"🖼 Total image files (JPG + PNG): {len(image_files)}")
-print("🚀 Starting dataset processing...\n")
+    # Collect all txt annotation files and images
+    txt_files = [f for f in os.listdir(TXT_DIR) if f.endswith(".txt")]
+    image_files = [f for f in os.listdir(IMAGE_DIR) if f.endswith((".jpg", ".png"))]
 
-# Store label distributions
-label_distribution = []
-valid_txt_files = []
-invalid_txt_files = []
+    # Print and save initial dataset summary
+    summary = (
+        f"\n📊 Initial Dataset Summary:\n"
+        f"📂 Total annotation files (TXT): {len(txt_files)}\n"
+        f"🖼 Total image files (JPG + PNG): {len(image_files)}\n"
+        f"🚀 Starting dataset processing...\n"
+    )
+    print(summary)
+    doc_file.write(summary)
 
-# Step 1: Verify labels and collect valid txt files
-for txt_file in txt_files:
-    txt_path = os.path.join(TXT_DIR, txt_file)
-    
-    with open(txt_path, "r") as f:
-        lines = f.readlines()
-    
-    if not lines:
-        continue  # Skip empty annotation files
+    # Store label distributions
+    label_distribution = []
+    valid_txt_files = []
+    invalid_txt_files = []
 
-    # Collect classes from annotations
-    labels = [int(line.split()[0]) for line in lines]
+    # Step 1: Verify labels and collect valid txt files
+    for txt_file in txt_files:
+        txt_path = os.path.join(TXT_DIR, txt_file)
+        
+        with open(txt_path, "r") as f:
+            lines = f.readlines()
+        
+        if not lines:
+            continue  # Skip empty annotation files
 
-    # Check if all labels are within the range 0-4
-    if all(0 <= label <= 4 for label in labels):  # CHANGE HERE IF LABELS CHANGE
-        valid_txt_files.append(txt_file)
-        label_distribution.extend(labels)
+        # Collect classes from annotations
+        labels = [int(line.split()[0]) for line in lines]
+
+        # Check if all labels are within the range 0-4
+        if all(0 <= label <= 4 for label in labels):
+            valid_txt_files.append(txt_file)
+            label_distribution.extend(labels)
+        else:
+            invalid_txt_files.append(txt_file)
+
+    # Step 1.1: Print and save label validation result
+    if not invalid_txt_files:
+        validation_msg = "✅ All annotation files have valid class labels (0-4).\n"
+        print(validation_msg)
+        doc_file.write(validation_msg)
     else:
-        invalid_txt_files.append(txt_file)
+        error_msg = "❌ Error: Invalid class labels found:\n"
+        print(error_msg)
+        doc_file.write(error_msg)
+        for file in invalid_txt_files:
+            print(file)
+            doc_file.write(file + "\n")
+        exit(1)
 
-# Step 1.1: If all class labels are valid, print a success message
-if not invalid_txt_files:
-    print("✅ All annotation files have valid class labels (0-4).")
-else:
-    print("❌ Error: The following annotation files contain invalid class labels (not between 0-4):")
-    for file in invalid_txt_files:
-        print(file)
-    exit(1)
+    # **Class Distribution Before Splitting**
+    class_counts_before = Counter(label_distribution)
+    class_distribution_msg = "\n📊 Class Distribution Before Splitting:\n"
+    for class_id, count in sorted(class_counts_before.items()):
+        class_distribution_msg += f"🔹 Class {class_id}: {count} instances\n"
+    print(class_distribution_msg)
+    doc_file.write(class_distribution_msg)
 
-# **Print Class Distribution Before Splitting**
-class_counts_before = Counter(label_distribution)
-print("\n📊 Class Distribution Before Splitting:")
-for class_id, count in sorted(class_counts_before.items()):
-    print(f"🔹 Class {class_id}: {count} instances")
+    # Step 2: Perform stratified sampling
+    valid_image_files = [f.replace(".txt", ".jpg") if os.path.exists(os.path.join(IMAGE_DIR, f.replace(".txt", ".jpg"))) 
+                        else f.replace(".txt", ".png") for f in valid_txt_files]
 
-# Step 2: Perform stratified sampling
-# Convert file names to image names
-valid_image_files = [f.replace(".txt", ".jpg") if os.path.exists(os.path.join(IMAGE_DIR, f.replace(".txt", ".jpg"))) 
-                     else f.replace(".txt", ".png") for f in valid_txt_files]
+    image_to_label = {valid_image_files[i]: label_distribution[i] for i in range(len(valid_image_files))}
+    X = valid_image_files
+    y = [image_to_label[f] for f in valid_image_files]
 
-# Map file names to their dominant label
-image_to_label = {valid_image_files[i]: label_distribution[i] for i in range(len(valid_image_files))}
+    # Stratified split (80% train, 20% validation)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-# Prepare dataset for stratified split
-X = valid_image_files  # Image names
-y = [image_to_label[f] for f in valid_image_files]  # Corresponding labels
+    # **Class Distribution After Splitting**
+    class_distribution_after_msg = "\n📊 Class Distribution After Splitting:\n"
+    
+    train_class_counts = Counter(y_train)
+    val_class_counts = Counter(y_val)
 
-# **Print Total Unique Classes Detected**
-unique_classes = set(y)
-print(f"\n✅ Unique classes detected: {len(unique_classes)} (Classes: {sorted(unique_classes)})")
+    class_distribution_after_msg += "🔹 Training Set:\n"
+    for class_id, count in sorted(train_class_counts.items()):
+        class_distribution_after_msg += f"   🟢 Class {class_id}: {count} instances\n"
 
-# Stratified split (80% train, 20% validation)
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    class_distribution_after_msg += "🔹 Validation Set:\n"
+    for class_id, count in sorted(val_class_counts.items()):
+        class_distribution_after_msg += f"   🔵 Class {class_id}: {count} instances\n"
 
-# **Print Class Distribution in Train & Validation**
-print("\n📊 Class Distribution After Splitting:")
-train_class_counts = Counter(y_train)
-val_class_counts = Counter(y_val)
+    print(class_distribution_after_msg)
+    doc_file.write(class_distribution_after_msg)
 
-print("🔹 Training Set:")
-for class_id, count in sorted(train_class_counts.items()):
-    print(f"   🟢 Class {class_id}: {count} instances")
+    # **Copy Images and Labels to Train/Val Folders**
+    def copy_files(file_list, src_img_dir, src_txt_dir, dest_img_dir, dest_txt_dir):
+        for file in file_list:
+            txt_file = file.replace(".jpg", ".txt").replace(".png", ".txt")
+            src_img_path = os.path.join(src_img_dir, file)
+            src_txt_path = os.path.join(src_txt_dir, txt_file)
+            
+            dest_img_path = os.path.join(dest_img_dir, file)
+            dest_txt_path = os.path.join(dest_txt_dir, txt_file)
+            
+            # Copy files if they exist
+            if os.path.exists(src_img_path):
+                shutil.copy(src_img_path, dest_img_path)
+            if os.path.exists(src_txt_path):
+                shutil.copy(src_txt_path, dest_txt_path)
 
-print("🔹 Validation Set:")
-for class_id, count in sorted(val_class_counts.items()):
-    print(f"   🔵 Class {class_id}: {count} instances")
+    # Copy train files
+    copy_files(X_train, IMAGE_DIR, TXT_DIR, TRAIN_IMG_DIR, TRAIN_TXT_DIR)
 
-# **Print Train/Val Split Ratio Confirmation**
-train_percentage = (len(X_train) / len(y)) * 100
-val_percentage = (len(X_val) / len(y)) * 100
-print(f"\n📊 Train/Val Split Ratio: {train_percentage:.2f}% Train | {val_percentage:.2f}% Val")
+    # Copy validation files
+    copy_files(X_val, IMAGE_DIR, TXT_DIR, VAL_IMG_DIR, VAL_TXT_DIR)
 
-# Step 3: Copy files to corresponding directories
-def copy_files(file_list, src_img_dir, src_txt_dir, dest_img_dir, dest_txt_dir):
-    for file in file_list:
-        txt_file = file.replace(".jpg", ".txt").replace(".png", ".txt")
-        src_img_path = os.path.join(src_img_dir, file)
-        src_txt_path = os.path.join(src_txt_dir, txt_file)
-        
-        dest_img_path = os.path.join(dest_img_dir, file)
-        dest_txt_path = os.path.join(dest_txt_dir, txt_file)
-        
-        # Copy files if they exist
-        if os.path.exists(src_img_path):
-            shutil.copy(src_img_path, dest_img_path)
-        if os.path.exists(src_txt_path):
-            shutil.copy(src_txt_path, dest_txt_path)
+    # **Train/Val Split Ratio Confirmation**
+    train_percentage = (len(X_train) / len(y)) * 100
+    val_percentage = (len(X_val) / len(y)) * 100
+    split_ratio_msg = f"\n📊 Train/Val Split Ratio: {train_percentage:.2f}% Train | {val_percentage:.2f}% Val\n"
+    print(split_ratio_msg)
+    doc_file.write(split_ratio_msg)
 
-# Copy train files
-copy_files(X_train, IMAGE_DIR, TXT_DIR, TRAIN_IMG_DIR, TRAIN_TXT_DIR)
-
-# Copy validation files
-copy_files(X_val, IMAGE_DIR, TXT_DIR, VAL_IMG_DIR, VAL_TXT_DIR)
-
-# Step 4: Check for duplicate images between train and val
-train_images = set(os.listdir(TRAIN_IMG_DIR))
-val_images = set(os.listdir(VAL_IMG_DIR))
-duplicates = train_images.intersection(val_images)
-
-if duplicates:
-    print(f"\n❌ Error: Found {len(duplicates)} duplicated images between train and val sets!")
-    for dup in duplicates:
-        print(dup)
-    exit(1)
-else:
-    print("\n✅ No duplicate images found between train and validation sets.")
-
-# Final report
-print("\n✅ Dataset successfully split using stratified sampling!")
-print(f"📊 Final Train Set: {len(X_train)} images")
-print(f"📊 Final Validation Set: {len(X_val)} images")
-print("✅ train.txt and val.txt created with label filenames (including extensions).")
+    # Final report
+    final_msg = (
+        "\n✅ Dataset successfully split using stratified sampling!\n"
+        f"📊 Final Train Set: {len(X_train)} images\n"
+        f"📊 Final Validation Set: {len(X_val)} images\n"
+        "✅ train.txt and val.txt created with label filenames (including extensions).\n"
+    )
+    print(final_msg)
+    doc_file.write(final_msg)
