@@ -29,7 +29,7 @@ txt_files = [f for f in os.listdir(TXT_DIR) if f.endswith(".txt")]
 image_files = [f for f in os.listdir(IMAGE_DIR) if f.endswith((".jpg", ".png"))]
 
 # Print initial summary
-print("📊 Initial Dataset Summary:")
+print("\n📊 Initial Dataset Summary:")
 print(f"📂 Total annotation files (TXT): {len(txt_files)}")
 print(f"🖼 Total image files (JPG + PNG): {len(image_files)}")
 print("🚀 Starting dataset processing...\n")
@@ -68,6 +68,12 @@ else:
         print(file)
     exit(1)
 
+# **Print Class Distribution Before Splitting**
+class_counts_before = Counter(label_distribution)
+print("\n📊 Class Distribution Before Splitting:")
+for class_id, count in sorted(class_counts_before.items()):
+    print(f"🔹 Class {class_id}: {count} instances")
+
 # Step 2: Perform stratified sampling
 # Convert file names to image names
 valid_image_files = [f.replace(".txt", ".jpg") if os.path.exists(os.path.join(IMAGE_DIR, f.replace(".txt", ".jpg"))) 
@@ -80,8 +86,30 @@ image_to_label = {valid_image_files[i]: label_distribution[i] for i in range(len
 X = valid_image_files  # Image names
 y = [image_to_label[f] for f in valid_image_files]  # Corresponding labels
 
+# **Print Total Unique Classes Detected**
+unique_classes = set(y)
+print(f"\n✅ Unique classes detected: {len(unique_classes)} (Classes: {sorted(unique_classes)})")
+
 # Stratified split (80% train, 20% validation)
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+# **Print Class Distribution in Train & Validation**
+print("\n📊 Class Distribution After Splitting:")
+train_class_counts = Counter(y_train)
+val_class_counts = Counter(y_val)
+
+print("🔹 Training Set:")
+for class_id, count in sorted(train_class_counts.items()):
+    print(f"   🟢 Class {class_id}: {count} instances")
+
+print("🔹 Validation Set:")
+for class_id, count in sorted(val_class_counts.items()):
+    print(f"   🔵 Class {class_id}: {count} instances")
+
+# **Print Train/Val Split Ratio Confirmation**
+train_percentage = (len(X_train) / len(y)) * 100
+val_percentage = (len(X_val) / len(y)) * 100
+print(f"\n📊 Train/Val Split Ratio: {train_percentage:.2f}% Train | {val_percentage:.2f}% Val")
 
 # Step 3: Copy files to corresponding directories
 def copy_files(file_list, src_img_dir, src_txt_dir, dest_img_dir, dest_txt_dir):
@@ -111,25 +139,12 @@ val_images = set(os.listdir(VAL_IMG_DIR))
 duplicates = train_images.intersection(val_images)
 
 if duplicates:
-    print(f"❌ Error: Found {len(duplicates)} duplicated images between train and val sets!")
+    print(f"\n❌ Error: Found {len(duplicates)} duplicated images between train and val sets!")
     for dup in duplicates:
         print(dup)
     exit(1)
 else:
-    print("✅ No duplicate images found between train and validation sets.")
-
-# Step 5: Create train.txt and val.txt with filenames of labels (with extensions)
-train_txt_files = [f for f in os.listdir(TRAIN_TXT_DIR) if f.endswith(".txt")]
-val_txt_files = [f for f in os.listdir(VAL_TXT_DIR) if f.endswith(".txt")]
-
-# Save as CSV (each file name on a new line)
-with open(TRAIN_CSV, "w") as f:
-    for file in train_txt_files:
-        f.write(file + "\n")
-
-with open(VAL_CSV, "w") as f:
-    for file in val_txt_files:
-        f.write(file + "\n")
+    print("\n✅ No duplicate images found between train and validation sets.")
 
 # Final report
 print("\n✅ Dataset successfully split using stratified sampling!")
