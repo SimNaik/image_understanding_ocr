@@ -13,10 +13,10 @@ type_mapping = {
     1: "1",
     2: "2",
     3: "3",
-    4: "4"
-    5: "5"
-    6: "6"
-    7: "7"
+    4: "4",
+    5: "5",
+    6: "6",
+    7: "7",
     8: "8"
 }
 class_label = type_mapping.get(class_id, f"Class_{class_id}")
