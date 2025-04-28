@@ -31,8 +31,8 @@ report, items = evaluate_model(
 )
 
 # Define paths
-val_images_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/version1_val/val_images"
-val_labels_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/version1_val/val"
+val_images_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/images/val"
+val_labels_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/labels/val"
 third_images_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/predictions_v2/unsorted_annotations_images_2249_BT5_v2"
 threshold_folder = f"/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/{conf_threshold}_thres_{class_label}"
 
@@ -211,10 +211,11 @@ def stitch_images_with_missed_predictions(category):
             f.write("\n".join(missing_images))
 
 # Function to stitch missed_predictions and missed_predictions_gt
-def stitch_missed_predictions():
+def stitch_missed_predictions_images():
     missed_gt_dir = os.path.join(threshold_folder, "missed_predictions_gt")
     missed_pred_dir = os.path.join(threshold_folder, "missed_predictions")
-    combined_dir = os.path.join(threshold_folder, "missed_predictions_combined")
+    third_dir = third_images_dir  # Directory with the third image
+    combined_dir = os.path.join(threshold_folder, "missed_predictions_images")
     os.makedirs(combined_dir, exist_ok=True)
 
     missed_gt_images = set(os.listdir(missed_gt_dir))
@@ -226,24 +227,25 @@ def stitch_missed_predictions():
     for image_name in common_images:
         gt_image_path = os.path.join(missed_gt_dir, image_name)
         pred_image_path = os.path.join(missed_pred_dir, image_name)
+        third_image_path = os.path.join(third_dir, image_name)
 
         # Read images
         gt_image = cv2.imread(gt_image_path)
         pred_image = cv2.imread(pred_image_path)
+        third_image = cv2.imread(third_image_path)
 
-        if gt_image is None or pred_image is None:
+        if gt_image is None or pred_image is None or third_image is None:
             print(f"Error loading one of the images: {image_name}")
             continue
 
-        # Combine images side by side (GT on the left and Prediction on the right)
-        combined_image = cv2.hconcat([gt_image, pred_image])
+        # Combine images side by side (GT + Prediction + Third Image)
+        combined_image = cv2.hconcat([gt_image, pred_image, third_image])
 
-        # Save the combined image in the new folder
+        # Save the combined image
         combined_image_path = os.path.join(combined_dir, image_name)
         cv2.imwrite(combined_image_path, combined_image)
 
-    print(f"Stitched images saved in: {combined_dir}")
-
+    print(f"Stitched missed prediction images saved in: {combined_dir}")
 
 # Process all categories and add third image stitching
 for category in categories:
@@ -267,5 +269,4 @@ else:
     stitch_images_with_missed_predictions("misclassified_annotations")
 
 # Call the missed_predictions stitching function at the end
-stitch_missed_predictions()
-
+stitch_missed_predictions_images()
