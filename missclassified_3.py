@@ -306,7 +306,7 @@ def copy_misclassified_images(conf_threshold, class_id, misclassified_annotation
 
     # If a MO source directory is provided, copy the images there as well
     if mo_source_dir:
-    mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_mo"
+     mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_mo"
     
     # Ensure the MO target directory exists
     if not os.path.exists(mo_target_dir):
