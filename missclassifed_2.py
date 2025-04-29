@@ -143,13 +143,13 @@ def copy_misclassified_images_with_bbox(conf_threshold, class_id, misclassified_
 
 
 # Example usage:
-val_images_dir = "/Users/simrannaik/Desktop/Image_Yolo/model_check/data_val_images_txt/Training/images/val"
-val_labels_dir = "/Users/simrannaik/Desktop/Image_Yolo/model_check/data_val_images_txt/Training/labels/val"
-target_dir = "/Users/simrannaik/Desktop/Image_Yolo/model_check/misclassified_annotation_pred"
-gt_target_dir = "/Users/simrannaik/Desktop/Image_Yolo/model_check/misclassified_annotations_gt"
+val_images_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/images/val"
+val_labels_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/labels/val"
+target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotation_pred"
+gt_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_gt"
 
-conf_threshold = 0.5
-class_id = 4
+conf_threshold = float(input("Enter the confidence threshold (0.1 to 0.9): "))
+class_id = int(input("Enter the class ID: "))
 
 # Assuming `misclassified_annotations_per_conf` is the dictionary from the previous steps
 details = copy_misclassified_images_with_bbox(
