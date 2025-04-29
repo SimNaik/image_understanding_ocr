@@ -85,6 +85,10 @@ def copy_misclassified_images(conf_threshold, class_id, misclassified_annotation
     
     return details
 
+# Print the details
+print(details)
+
+
 # ————————————————————————————————————————————————————————————————
 # Example of using the functions with a prediction DataFrame and ground truth DataFrame
 # Replace `model_pres_df` and `gt_df` with your actual DataFrames:
@@ -238,6 +242,13 @@ def copy_misclassified_images_with_bbox(conf_threshold, class_id, misclassified_
         'unique_images_copied': unique_image_count,
         'duplicate_images': duplicate_image_count
     }
+        # Print the results
+    print(f"Details: {result_details}")
+    
+    # Print directory contents for each folder
+    print(f"Images copied to {target_dir}: {len(os.listdir(target_dir))}")
+    print(f"Images copied to {gt_target_dir}: {len(os.listdir(gt_target_dir))}")
+
 
 
 def copy_misclassified_images(conf_threshold, class_id, misclassified_annotations_per_conf, 
@@ -295,19 +306,45 @@ def copy_misclassified_images(conf_threshold, class_id, misclassified_annotation
 
     # If a MO source directory is provided, copy the images there as well
     if mo_source_dir:
-        mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_mo"
-        
-        # Ensure the MO target directory exists
-        if not os.path.exists(mo_target_dir):
-            os.makedirs(mo_target_dir)
-        
-        for image_id in unique_images:
-            mo_source_image_path = os.path.join(mo_source_dir, image_id)
-            mo_target_image_path = os.path.join(mo_target_dir, image_id)
+    mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_mo"
+    
+    # Ensure the MO target directory exists
+    if not os.path.exists(mo_target_dir):
+        print(f"Creating target directory: {mo_target_dir}")
+        os.makedirs(mo_target_dir)
+    
+    # Extract unique image IDs from misclassified annotations
+    misclassified_images = misclassified_annotations_per_conf.get(conf_threshold, [])
+    image_paths = [m['image_id'] for m in misclassified_images]
+    unique_images = set(image_paths)  # Get unique image IDs
+
+    # Print debug information
+    print(f"Total unique images: {len(unique_images)}")
+
+    # List of possible image file extensions
+    possible_extensions = ['.png', '.jpg', '.jpeg']
+
+    # Iterate over unique image IDs and copy corresponding images from mo_source_dir to mo_target_dir
+    for image_id in unique_images:
+        # Check if image exists in any of the possible extensions
+        image_path_found = False
+        for ext in possible_extensions:
+            image_path = image_id + ext
+            mo_source_image_path = os.path.join(mo_source_dir, image_path)
             
-            # Ensure the image exists in the source directory before copying
+            # Print to check the paths being used
+            print(f"Checking for image at: {mo_source_image_path}")
+            
             if os.path.exists(mo_source_image_path):
+                image_path_found = True
+                mo_target_image_path = os.path.join(mo_target_dir, image_path)
+                print(f"Copying image: {mo_source_image_path} to {mo_target_image_path}")
                 shutil.copy(mo_source_image_path, mo_target_image_path)
+                break  # Exit once the image is found with the correct extension
+        
+        if not image_path_found:
+            print(f"Image not found for {image_id} in expected formats.")
+
 
     details = {
         "conf_threshold": conf_threshold,
@@ -318,6 +355,7 @@ def copy_misclassified_images(conf_threshold, class_id, misclassified_annotation
     }
     
     return details
+
 
 
 # Example usage:
@@ -345,4 +383,3 @@ details = copy_misclassified_images_with_bbox(
 
 # Print the details
 print(details)
-
