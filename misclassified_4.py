@@ -384,6 +384,9 @@ target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_in
 gt_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_gt"
 mo_source_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/predictions_v2/unsorted_annotations_images_2249_BT5_v2"
 
+conf_threshold = float(input("Enter the confidence threshold (0.1 to 0.9): "))
+class_id = int(input("Enter the class ID: "))
+
 # Call the function
 create_and_copy_to_mo_folder(
     misclassified_annotations_per_conf=misclassified_annotations_per_conf,
@@ -401,9 +404,9 @@ details = copy_misclassified_images_with_bbox(
     val_images_dir=val_images_dir,
     val_labels_dir=val_labels_dir,
     target_dir=target_dir,
-    gt_target_dir=gt_target_dir
+    gt_target_dir=gt_target_dir,
+    mo_source_dir=mo_source_dir
 )
 
 # Print the details
 print(details)
-
