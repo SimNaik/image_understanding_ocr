@@ -138,11 +138,11 @@ def copy_misclassified_images_with_bbox(conf_threshold, class_id, misclassified_
 
         if image_path:
             # If the image exists, copy it to the target directory
-            target_image_path = os.path.join(target_dir, f"{image_name}.jpg")
+            target_image_path = os.path.join(target_dir, f"{image_name}{os.path.splitext(image_path)[1]}")
             shutil.copy(image_path, target_image_path)
             
             # Copy image for ground truth bounding boxes
-            gt_image_path = os.path.join(gt_target_dir, f"{image_name}.jpg")
+            gt_image_path = os.path.join(gt_target_dir, f"{image_name}{os.path.splitext(image_path)[1]}")
             shutil.copy(image_path, gt_image_path)
 
             # If draw_bbox is True, draw bounding boxes for misclassified annotations
@@ -329,7 +329,7 @@ def create_and_copy_to_mo_folder(misclassified_annotations_per_conf, gt_target_d
     """
     
     # Set the location for the _MO folder (directly under the specified path)
-    mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_MO"
+    mo_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v1/report_oc/misclassified_annotations_MO"
     
     # Make sure the _MO folder exists
     os.makedirs(mo_target_dir, exist_ok=True)
@@ -380,21 +380,12 @@ def create_and_copy_to_mo_folder(misclassified_annotations_per_conf, gt_target_d
 # Example usage with updated directories and method call:
 val_images_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/images/val"
 val_labels_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT7_IMG_11K+GB_INFER_IT6_8LA/Training/labels/val"
-target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotation_pred"
-gt_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/report_oc/misclassified_annotations_gt"
-mo_source_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v2/predictions_v2/unsorted_annotations_images_2249_BT5_v2"
+target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v1/report_oc/misclassified_annotation_pred"
+gt_target_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v1/report_oc/misclassified_annotations_gt"
+mo_source_dir = "/mnt/shared-storage/yolov11L_Image_training_set_400/BT5_IMG_10K_infer_IT5/BT5_all/Training/test_predictions_v1/predictions/unsorted_annotations_images_2249_BT5"
 
 conf_threshold = float(input("Enter the confidence threshold (0.1 to 0.9): "))
 class_id = int(input("Enter the class ID: "))
-
-# Call the function
-create_and_copy_to_mo_folder(
-    misclassified_annotations_per_conf=misclassified_annotations_per_conf,
-    gt_target_dir=gt_target_dir,
-    mo_source_dir=mo_source_dir,
-    target_dir=target_dir
-)
-
 
 # Assuming `misclassified_annotations_per_conf` is the dictionary from the previous steps
 details = copy_misclassified_images_with_bbox(
@@ -407,6 +398,17 @@ details = copy_misclassified_images_with_bbox(
     gt_target_dir=gt_target_dir,
     mo_source_dir=mo_source_dir
 )
+
+
+# Call the function
+create_and_copy_to_mo_folder(
+    misclassified_annotations_per_conf=misclassified_annotations_per_conf,
+    gt_target_dir=gt_target_dir,
+    mo_source_dir=mo_source_dir,
+    target_dir=target_dir
+)
+
+
 
 # Print the details
 print(details)
